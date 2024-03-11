@@ -125,6 +125,15 @@ class FlutterPaxPrinterUtility {
     return response;
   }
 
+  static Future<bool?> printImageMemory(Uint8List image) async {
+    Map<String, dynamic> arguments = {
+      "bitmap": image,
+    };
+    final bool? response =
+        await _channel.invokeMethod('printImageAsset', arguments);
+    return response;
+  }
+
   static Future<bool?> printImageAsset(String img) async {
     Uint8List byte = await FlutterPaxPrinterUtility().getImageFromAsset(img);
     Map<String, dynamic> arguments = {

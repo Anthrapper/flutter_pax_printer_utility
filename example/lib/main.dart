@@ -1,3 +1,6 @@
+import 'dart:developer';
+import 'package:barcode_image/barcode_image.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:ui' as ui;
@@ -6,6 +9,7 @@ import 'package:flutter_pax_printer_utility/flutter_pax_printer_utility.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:image/image.dart' as im;
 
 void main() {
   runApp(const MyApp());
@@ -248,6 +252,12 @@ class _HomePageState extends State<HomePage> {
                   MaterialPageRoute(builder: (context) => const ReceiptPage())),
               child: const Text("TEST PRINT RECEIPT FROM BITMAP VIEW"),
             ),
+            ElevatedButton(
+              onPressed: () {
+                createBarCode();
+              },
+              child: const Text('Create Bar Code'),
+            )
           ],
         ),
       ),
@@ -354,24 +364,24 @@ class _ReceiptPageState extends State<ReceiptPage> {
                   const Text("MID             : 0812393"),
                   const Text("REFF           : 1023701923701"),
                   const SizedBox(height: 20.0),
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       Text("Amount"),
                       Text("100.000"),
                     ],
                   ),
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       Text("Tip"),
                       Text("0"),
                     ],
                   ),
                   const Divider(),
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       Text("TOTAL"),
                       Text("100.000"),
                     ],
@@ -409,4 +419,23 @@ class _ReceiptPageState extends State<ReceiptPage> {
       ),
     );
   }
+}
+
+Future<void> createBarCode() async {
+  // Create an image
+  final image = im.Image(width: 300, height: 120);
+
+// Fill it with a solid color (white)
+  im.fill(image, color: im.ColorRgb8(255, 255, 255));
+
+// Draw the barcode
+  drawBarcode(image, Barcode.code128(), 'Test');
+
+  final bytes = im.encodePng(image);
+
+  await FlutterPaxPrinterUtility.init;
+  await FlutterPaxPrinterUtility.leftIndents(30);
+  await FlutterPaxPrinterUtility.printImageMemory(Uint8List.fromList(bytes));
+  await FlutterPaxPrinterUtility.step(50);
+  await FlutterPaxPrinterUtility.start();
 }
